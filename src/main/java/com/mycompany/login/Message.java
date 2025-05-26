@@ -17,15 +17,15 @@ import org.json.simple.JSONObject;
 class Message {
     private final List<JSONObject> sentMessages = new ArrayList<>();
     private static int totalMessages = 0;
-
+// Stores all successfully sent messages in memory
     public boolean checkMessageID(String id) {
         return id.length() <= 10;
     }
-
+// Validates the message ID
     public boolean checkRecipientCell(String cell) {
         return cell.startsWith("+") && cell.length() <= 10;
     }
-
+// Validates the recipient's cell number: must start with '+' and be no longer than 10 characters
     public String createMessageHash(String id, String message) {
         String[] words = message.trim().split("\\s+");
         String first = words.length > 0 ? words[0] : "";
@@ -38,7 +38,7 @@ class Message {
         if (!checkMessageID(id)) {
             return "Invalid Message ID.";
         }
-
+// Interactive method to gather message data and either send
         String recipient = JOptionPane.showInputDialog("Enter recipient number (include + and max 10 chars):");
         if (!checkRecipientCell(recipient)) {
             return "Invalid recipient cell.";
@@ -50,7 +50,7 @@ class Message {
         }
 
         String hash = createMessageHash(id, messageText);
-
+ // Generate message hash
         String option = JOptionPane.showInputDialog("""
                 What would you like to do with the message?
                 1 - Send Message
@@ -67,18 +67,18 @@ class Message {
         messageObj.put("MessageHash", hash);
         messageObj.put("Recipient", recipient);
         messageObj.put("Message", messageText);
-
+// Create JSON object to represent the message
         if (option.equals("1")) {
             sentMessages.add(messageObj);
             totalMessages++;
             JOptionPane.showMessageDialog(null, printMessage(messageObj));
         }
-
+// Send message
         if (option.equals("3")) {
             storeMessage(messageObj);
             JOptionPane.showMessageDialog(null, "Message stored for later.");
         }
-
+ // Store message to file
         return "Done.";
     }
 
@@ -90,13 +90,13 @@ class Message {
                "Recipient: " + msg.get("Recipient") + "\n" +
                "Message: " + msg.get("Message");
     }
-
+  // Returns a nicely formatted string for a given message
     public void printMessages() {
         for (JSONObject msg : sentMessages) {
             JOptionPane.showMessageDialog(null, printMessage(msg));
         }
     }
-
+// Displays all sent messages using a dialog
     public int returnTotalMessages() {
         return totalMessages;
     }
@@ -116,7 +116,7 @@ public void sendMessageSimulated(String option, JSONObject messageObj) {
         System.out.println("Message disregarded.");
         return;
     }
-
+// Used for testing or non-interactive environments (bypasses user input)
     if (option.equals("1")) {
         sentMessages.add(messageObj);
         totalMessages++;
