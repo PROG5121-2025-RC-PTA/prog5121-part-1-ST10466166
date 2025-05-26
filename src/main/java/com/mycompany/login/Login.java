@@ -6,7 +6,7 @@ package com.mycompany.login;
 import javax.swing.JOptionPane;
 /**
  *
- * @author RC_Student_lab
+ * @author musak
  */
 public class Login {
 
@@ -15,72 +15,78 @@ public class Login {
     public String firstName;
     public String lastName;
 
-    // Method to check username format
-    public boolean checkUserName(String username) {
-    return username.contains("_") && username.length() <= 5;
+ public boolean checkUserName(String username) {
+        return username.contains("_") && username.length() <= 10;
     }
 
-    // Method to check password complexity
     public boolean checkPasswordComplexity(String password) {
-    boolean hasUppercase = false;
-    boolean hasDigit = false;
-    boolean hasSpecialChar = false;
-    if (password.length() < 8) return false;
-    for (char c : password.toCharArray()) {
-    if (Character.isUpperCase(c)) hasUppercase = true;
-    else if (Character.isDigit(c)) hasDigit = true;
-    else if (!Character.isLetterOrDigit(c)) hasSpecialChar = true;
+        boolean hasUppercase = false, hasDigit = false, hasSpecialChar = false;
+        if (password.length() < 8) return false;
+        for (char c : password.toCharArray()) {
+            if (Character.isUpperCase(c)) hasUppercase = true;
+            else if (Character.isDigit(c)) hasDigit = true;
+            else if (!Character.isLetterOrDigit(c)) hasSpecialChar = true;
         }
-     return hasUppercase && hasDigit && hasSpecialChar;
+        return hasUppercase && hasDigit && hasSpecialChar;
     }
-    // ✅ Method to check cell phone number
+
     public boolean checkPhoneNumber(String phoneNumber) {
-     return phoneNumber.startsWith("+") && phoneNumber.length() <= 10;
+        return phoneNumber != null && phoneNumber.startsWith("+") && phoneNumber.length() <= 13 && phoneNumber.length() >= 10;
     }
-   //  User register method to include phone number
+
     public String registerUser() {
-    username = JOptionPane.showInputDialog("Enter username (must contain underscore and max 5 characters):");
-    if (!checkUserName(username)) {
-     return "Username is not correctly formatted, please ensure that your username contains an underscore and is no more than 5 characters in length.";
+        username = JOptionPane.showInputDialog("Enter username (must contain underscore and max 10 characters):");
+        if (!checkUserName(username)) {
+            return "Username is not correctly formatted.";
         }
-    password = JOptionPane.showInputDialog("Enter password (min 8 characters, a capital, a number, a special char):");
-    if (!checkPasswordComplexity(password)) {
-     return "Password is not correctly formatted, please ensure that the password contains at least 8 characters, a capital letter, a number and a special character.";
+
+        password = JOptionPane.showInputDialog("Enter password (min 8 chars, 1 capital, 1 number, 1 special char):");
+        if (!checkPasswordComplexity(password)) {
+            return "Password is not correctly formatted.";
         }
-    firstName = JOptionPane.showInputDialog("Enter your first name:");
-    lastName = JOptionPane.showInputDialog("Enter your last name:");
-    String phoneNumber = JOptionPane.showInputDialog("Enter your cell phone number (include international code, max 10 chars):");
-    if (!checkPhoneNumber(phoneNumber)) {
-      return "Cell phone number incorrectly formatted or does not contain international code.";
+
+        firstName = JOptionPane.showInputDialog("Enter your first name:");
+        lastName = JOptionPane.showInputDialog("Enter your last name:");
+
+        String phoneNumber = JOptionPane.showInputDialog("Enter your phone number (+ format, max 13 chars):");
+        if (!checkPhoneNumber(phoneNumber)) {
+            return "Cell phone number incorrectly formatted.";
         }
-      return "Username successfully captured\nPassword successfully captured\nCell phone number successfully added\nUser registered successfully!";
+
+        return "User registered successfully!";
     }
 
-    // User login method
     public boolean loginUser() {
-     String inputUsername = JOptionPane.showInputDialog("Enter username to login:");
-     String inputPassword = JOptionPane.showInputDialog("Enter password to login:");
-      return inputUsername.equals(username) && inputPassword.equals(password);
+        String inputUsername = JOptionPane.showInputDialog("Enter username to login:");
+        String inputPassword = JOptionPane.showInputDialog("Enter password to login:");
+        return inputUsername.equals(username) && inputPassword.equals(password);
     }
 
-    // Return login
     public String returnLoginStatus(boolean isLoggedIn) {
-     if (isLoggedIn) {
-      return "Welcome " + firstName + ", " + lastName + " it is great to see you again.";
-    } else {
-        return "Username or password incorrect, please try again.";
-        }
+        return isLoggedIn
+            ? "Welcome " + firstName + " " + lastName + ", it is great to see you again."
+            : "Username or password incorrect.";
     }
 
-    //Login
     public static void main(String[] args) {
-      Login loginSystem = new Login();
-      // User Registration details
-      String registrationMessage = loginSystem.registerUser();
-      JOptionPane.showMessageDialog(null, registrationMessage);
-      // User login details
-      boolean isLoggedIn = loginSystem.loginUser();
-      String loginStatus = loginSystem.returnLoginStatus(isLoggedIn);
-      JOptionPane.showMessageDialog(null, loginStatus);
+        Login login = new Login();
+        Message message = new Message();
+
+        String regMsg = login.registerUser();
+        JOptionPane.showMessageDialog(null, regMsg);
+
+        boolean isLoggedIn = login.loginUser();
+        JOptionPane.showMessageDialog(null, login.returnLoginStatus(isLoggedIn));
+
+        if (isLoggedIn) {
+            JOptionPane.showMessageDialog(null, "Welcome to QuickChat.");
+            int numToSend = Integer.parseInt(JOptionPane.showInputDialog("How many messages would you like to send?"));
+            for (int i = 0; i < numToSend; i++) {
+                message.sendMessage();
+            }
+
+            JOptionPane.showMessageDialog(null, "Total messages sent: " + message.returnTotalMessages());
+            message.printMessages();
+        }
     }
 }
