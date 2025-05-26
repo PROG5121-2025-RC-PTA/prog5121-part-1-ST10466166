@@ -71,22 +71,23 @@ public class Login {
     public static void main(String[] args) {
         Login login = new Login();
         Message message = new Message();
+// Assumes Message class is defined elsewhere
 
         String regMsg = login.registerUser();
         JOptionPane.showMessageDialog(null, regMsg);
-
+// Register the user
         boolean isLoggedIn = login.loginUser();
         JOptionPane.showMessageDialog(null, login.returnLoginStatus(isLoggedIn));
-
+// Attempt login
         if (isLoggedIn) {
             JOptionPane.showMessageDialog(null, "Welcome to QuickChat.");
             int numToSend = Integer.parseInt(JOptionPane.showInputDialog("How many messages would you like to send?"));
             for (int i = 0; i < numToSend; i++) {
                 message.sendMessage();
             }
-
+ // If login is successful, proceed to message sending
             JOptionPane.showMessageDialog(null, "Total messages sent: " + message.returnTotalMessages());
             message.printMessages();
-        }
+        }// Display message summary
     }
 }
