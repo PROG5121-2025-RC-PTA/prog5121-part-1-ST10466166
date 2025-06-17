@@ -15,7 +15,7 @@ public class Login {
     public String firstName;
     public String lastName;
 
- public boolean checkUserName(String username) {
+    public boolean checkUserName(String username) {
         return username.contains("_") && username.length() <= 10;
     }
 
@@ -31,27 +31,22 @@ public class Login {
     }
 
     public boolean checkPhoneNumber(String phoneNumber) {
-        return phoneNumber != null && phoneNumber.startsWith("+") && phoneNumber.length() <= 13 && phoneNumber.length() >= 10;
+        return phoneNumber != null && phoneNumber.startsWith("+") &&
+               phoneNumber.length() <= 13 && phoneNumber.length() >= 10;
     }
 
     public String registerUser() {
         username = JOptionPane.showInputDialog("Enter username (must contain underscore and max 10 characters):");
-        if (!checkUserName(username)) {
-            return "Username is not correctly formatted.";
-        }
+        if (!checkUserName(username)) return "Username is not correctly formatted.";
 
         password = JOptionPane.showInputDialog("Enter password (min 8 chars, 1 capital, 1 number, 1 special char):");
-        if (!checkPasswordComplexity(password)) {
-            return "Password is not correctly formatted.";
-        }
+        if (!checkPasswordComplexity(password)) return "Password is not correctly formatted.";
 
         firstName = JOptionPane.showInputDialog("Enter your first name:");
         lastName = JOptionPane.showInputDialog("Enter your last name:");
 
         String phoneNumber = JOptionPane.showInputDialog("Enter your phone number (+ format, max 13 chars):");
-        if (!checkPhoneNumber(phoneNumber)) {
-            return "Cell phone number incorrectly formatted.";
-        }
+        if (!checkPhoneNumber(phoneNumber)) return "Cell phone number incorrectly formatted.";
 
         return "User registered successfully!";
     }
@@ -71,23 +66,41 @@ public class Login {
     public static void main(String[] args) {
         Login login = new Login();
         Message message = new Message();
-// Assumes Message class is defined elsewhere
 
         String regMsg = login.registerUser();
         JOptionPane.showMessageDialog(null, regMsg);
-// Register the user
+
         boolean isLoggedIn = login.loginUser();
         JOptionPane.showMessageDialog(null, login.returnLoginStatus(isLoggedIn));
-// Attempt login
+
         if (isLoggedIn) {
             JOptionPane.showMessageDialog(null, "Welcome to QuickChat.");
-            int numToSend = Integer.parseInt(JOptionPane.showInputDialog("How many messages would you like to send?"));
-            for (int i = 0; i < numToSend; i++) {
-                message.sendMessage();
+            message.loadTestData(); // Populate test data
+            message.loadStoredMessagesFromJSON();
+
+            OUTER:
+            while (true) {
+                String[] options = {
+                    "Send Message", "Show Senders & Recipients",
+                    "Longest Sent Message", "Search by Message ID",
+                    "Search by Recipient", "Delete by Hash",
+                    "Display Report", "Exit"
+                };
+                int choice = JOptionPane.showOptionDialog(null, "Choose an action:", "QuickChat Menu",
+                        JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, options[0]);
+                switch (choice) {
+                    case 0 -> message.sendMessage();
+                    case 1 -> message.displaySendersAndRecipients();
+                    case 2 -> message.displayLongestSentMessage();
+                    case 3 -> message.searchByMessageID();
+                    case 4 -> message.searchByRecipient();
+                    case 5 -> message.deleteByHash();
+                    case 6 -> message.displayReport();
+                    default -> {
+                        break OUTER;
+                    }
+                }
             }
- // If login is successful, proceed to message sending
-            JOptionPane.showMessageDialog(null, "Total messages sent: " + message.returnTotalMessages());
-            message.printMessages();
-        }// Display message summary
+        }
     }
 }
