@@ -4,10 +4,10 @@
  */
 
 
-import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
-
-
+import org.json.simple.JSONObject;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 /**
  *
  * @author musak
@@ -85,76 +85,88 @@ public class LoginTest {
 
 
    public class MessageTest {
-    Message message = new Message();
 
-    @Test
-    public void testMessageLengthSuccess() {
-        String input = "This is a valid message.";
-        assertEquals("Message ready to send.", validateMessageLength(input));
+    private Message message;
+
+    @BeforeEach
+    public void setUp() {
+        message = new Message();
+
+        // Message 1: Sent
+        JSONObject msg1 = new JSONObject();
+        msg1.put("MessageID", "0000000001");
+        msg1.put("Recipient", "+27834557896");
+        msg1.put("Message", "Did you get the cake?");
+        msg1.put("MessageHash", message.createMessageHash("0000000001", "Did you get the cake?"));
+        message.sendMessageSimulated("1", msg1);
+
+        // Message 2: Stored
+        JSONObject msg2 = new JSONObject();
+        msg2.put("MessageID", "0000000002");
+        msg2.put("Recipient", "+27838884567");
+        msg2.put("Message", "Where are you? You are late! I have asked you to be on time.");
+        msg2.put("MessageHash", message.createMessageHash("0000000002", "Where are you? You are late! I have asked you to be on time."));
+        message.sendMessageSimulated("3", msg2);
+
+        // Message 3: Disregarded - not added
+
+        // Message 4: Sent
+        JSONObject msg4 = new JSONObject();
+        msg4.put("MessageID", "08388884567");
+        msg4.put("Recipient", "08388884567");
+        msg4.put("Message", "It is dinner time!");
+        msg4.put("MessageHash", message.createMessageHash("08388884567", "It is dinner time!"));
+        message.sendMessageSimulated("1", msg4);
+
+        // Message 5: Stored
+        JSONObject msg5 = new JSONObject();
+        msg5.put("MessageID", "0000000005");
+        msg5.put("Recipient", "+27838884567");
+        msg5.put("Message", "Ok, I am leaving without you.");
+        msg5.put("MessageHash", message.createMessageHash("0000000005", "Ok, I am leaving without you."));
+        message.sendMessageSimulated("3", msg5);
     }
 
     @Test
-    public void testMessageLengthFailure() {
-        String input = "A".repeat(255);
-        int excess = input.length() - 250;
-        assertEquals("Message exceeds 250 characters by " + excess + ", please reduce size.", validateMessageLength(input));
-    }
-
-    private String validateMessageLength(String msg) {
-        if (msg.length() <= 250) {
-            return "Message ready to send.";
-        } else {
-            return "Message exceeds 250 characters by " + (msg.length() - 250) + ", please reduce size.";
-        }
+    public void testSentMessagesPopulated() {
+        assertEquals(2, message.returnTotalMessages()); // Only 2 were actually sent
     }
 
     @Test
-    public void testRecipientNumberSuccess() {
-        String cell = "+1234567890";
-        assertEquals("Cell phone number successfully captured.", validatePhone(cell));
+    public void testLongestMessage() {
+        // Should return the longest sent message
+        String expectedLongest = "Where are you? You are late! I have asked you to be on time.";
+        String actualLongest = (String) message.getLongestMessage();  // You need to implement this
+        assertEquals(expectedLongest, actualLongest);
     }
 
     @Test
-    public void testRecipientNumberFailure() {
-        String cell = "123456789";
-        assertEquals("Cell phone number is incorrectly formatted or does not contain an international code. Please correct the number and try again.", validatePhone(cell));
-    }
-
-    private String validatePhone(String cell) {
-        if (cell.startsWith("+") && cell.length() <= 13 && cell.length() > 1 && cell.substring(1).matches("\\d+")) {
-            return "Cell phone number successfully captured.";
-        } else {
-            return "Cell phone number is incorrectly formatted or does not contain an international code. Please correct the number and try again.";
-        }
+    public void testSearchByMessageID() {
+        JSONObject result = (JSONObject) message.searchMessageByID("08388884567");  // You need to implement this
+        assertNotNull(result);
+        assertEquals("It is dinner time!", result.get("Message"));
     }
 
     @Test
-    public void testMessageHashCorrect() {
-        String Hash = message.createMessageHash("00", "Hi tonight");
-        assertEquals("00:10:HITONIGHT", Hash);
+    public void testSearchByRecipient() {
+        String recipient = "+27838884567";
+        int count = message.searchCountByRecipient(recipient); // You need to implement this helper
+        assertEquals(2, count); // Messages 2 and 5 stored
     }
 
     @Test
-    public void testMessageIDCreation() {
-        String id = String.format("%010d", new java.util.Random().nextInt(1_000_000_000));
-        assertEquals(10, id.length());
-        assertTrue(id.matches("\\d+"));
+    public void testDeleteByHash() {
+        String hash = message.createMessageHash("0000000002", "Where are you? You are late! I have asked you to be on time.");
+        boolean deleted = message.deleteMessageByHash(hash);  // You need to implement this to return boolean
+        assertTrue(deleted);
     }
 
     @Test
-    public void testMessageSentOptions() {
-        assertEquals("Message successfully sent.", simulateUserOption("1"));
-        assertEquals("Press 0 to delete message.", simulateUserOption("2"));
-        assertEquals("Message successfully stored.", simulateUserOption("3"));
-    }
-
-    private String simulateUserOption(String choice) {
-        return switch (choice) {
-            case "1" -> "Message successfully sent.";
-            case "2" -> "Press 0 to delete message.";
-            case "3" -> "Message successfully stored.";
-            default -> "Invalid option.";
-        };
+    public void testDisplayReportIncludesSentData() {
+        String report = message.generateReport();  // You need to implement this to return a string
+        assertTrue(report.contains("Message Hash"));
+        assertTrue(report.contains("Recipient"));
+        assertTrue(report.contains("Message"));
     }
 }
 }
